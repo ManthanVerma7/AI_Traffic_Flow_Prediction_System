@@ -1,0 +1,39 @@
+# Videos
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Reports
+*.pdf
+
+# Models
+*.pt
+*.pth
+*.pkl
+
+# Environment
+.env
+app/config/env/.env
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Generated folders
+data/input_videos/
+data/processed_videos/
+
+reports/exports/
+reports/pdf/
+
+models/yolo/
+models/pkl/
+
+# Temporary files
+*.log
+*.tmp
+
+# IDE files
+.vscode/
+.idea/

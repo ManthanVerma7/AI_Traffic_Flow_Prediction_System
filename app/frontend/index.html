@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Traffic Flow System</title>
+    <!-- Plotly -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="particles-js"></div>
+    
+    <header class="glass-header">
+        <div class="logo">
+            <div class="glow-orb"></div>
+            <h1>AI Traffic Flow <span class="accent">System</span></h1>
+        </div>
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
+            <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+    </header>
+
+    <main class="container">
+        
+        <!-- Step 1: Upload -->
+        <section id="upload-section" class="glass-card slide-up">
+            <div class="card-header">
+                <span class="step-badge">1</span>
+                <h2>Upload Video</h2>
+            </div>
+            
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-content">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                    <p class="primary-text">Upload Traffic Video</p>
+                    <p class="secondary-text">Drag & Drop Video file (.mp4)</p>
+                </div>
+                <input type="file" id="file-input" accept="video/mp4, video/avi, video/quicktime" hidden>
+            </div>
+            
+            <div id="upload-preview" class="hidden mt-6">
+                <div class="video-container">
+                    <video id="preview-video" controls playsinline autoplay muted loop></video>
+                    <div class="video-overlay-scan"></div>
+                </div>
+                <button id="start-btn" class="cyber-btn mt-4 w-full">
+                    <span>START ANALYSIS</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </section>
+
+        <!-- Step 2: Processing -->
+        <section id="processing-section" class="glass-card hidden slide-up mt-6">
+            <div class="card-header">
+                <span class="step-badge processing">2</span>
+                <h2>Processing Analysis</h2>
+            </div>
+            
+            <div class="terminal-box">
+                <div class="terminal-header">
+                    <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+                    <span class="terminal-title">System Status</span>
+                </div>
+                <div class="terminal-body" style="max-height: 200px; overflow-y: auto;">
+                    <p id="progress-status" class="typewriter-text">> Awaiting command...</p>
+                </div>
+            </div>
+
+            <div class="cyber-progress-container mt-6">
+                <div class="cyber-progress-bar" id="progress-bar"></div>
+                <div class="glow-effect"></div>
+            </div>
+        </section>
+
+        <!-- Step 3: Results -->
+        <section id="results-section" class="hidden slide-up mt-6">
+            
+            <div class="card-header mb-6">
+                <span class="step-badge success">3</span>
+                <h2>Analysis Results</h2>
+            </div>
+
+            <!-- Metrics -->
+            <div class="metrics-grid mb-6">
+                <div class="glass-metric">
+                    <div class="metric-icon">🎞️</div>
+                    <div class="metric-info">
+                        <h3>Total Frames</h3>
+                        <div class="metric-value font-mono" id="val-frames">0000</div>
+                    </div>
+                </div>
+                <div class="glass-metric">
+                    <div class="metric-icon">🚗</div>
+                    <div class="metric-info">
+                        <h3>Avg Vehicles</h3>
+                        <div class="metric-value font-mono" id="val-avg">0.0</div>
+                    </div>
+                </div>
+                <div class="glass-metric">
+                    <div class="metric-icon">🔥</div>
+                    <div class="metric-info">
+                        <h3>Max Vehicles</h3>
+                        <div class="metric-value font-mono" id="val-max">0</div>
+                    </div>
+                </div>
+                <div class="glass-metric highlight">
+                    <div class="metric-icon">🚦</div>
+                    <div class="metric-info">
+                        <h3>Traffic Level</h3>
+                        <div class="metric-value" id="val-level">UNKNOWN</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Video Output -->
+                <div class="glass-card dashboard-col-span">
+                    <h3>Processed Video Output</h3>
+                    <div class="video-container mt-4">
+                        <video id="output-video" controls playsinline></video>
+                    </div>
+                </div>
+
+                <!-- Charts Row 1: Line, Gauge, Bar -->
+                <div class="dashboard-col-span" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.5rem;">
+                    <div class="glass-card chart-wrapper" style="position: relative;">
+                        <div id="line-chart" class="plotly-chart"></div>
+                        
+
+                    </div>
+                    <div class="glass-card traffic-load-panel" id="traffic-load-panel">
+                        <div class="tlp-header">
+                            <div class="tlp-title-row">
+                                <span class="tlp-icon">⚡</span>
+                                <h3 class="tlp-title">Traffic Load</h3>
+                            </div>
+                            <div class="tlp-badge" id="tlp-badge">ANALYZING</div>
+                        </div>
+                        <div class="tlp-ring-area">
+                            <svg class="tlp-ring-svg" viewBox="0 0 200 200">
+                                <defs>
+                                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" id="ringGradStop1" stop-color="#10b981"/>
+                                        <stop offset="100%" id="ringGradStop2" stop-color="#00f0ff"/>
+                                    </linearGradient>
+                                    <filter id="ringGlow">
+                                        <feGaussianBlur stdDeviation="4" result="blur"/>
+                                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                                    </filter>
+                                </defs>
+                                <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+                                <circle id="tlp-ring-progress" cx="100" cy="100" r="85" fill="none" stroke="url(#ringGrad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="534" stroke-dashoffset="534" transform="rotate(-90 100 100)" filter="url(#ringGlow)" style="transition: stroke-dashoffset 1.8s cubic-bezier(0.4,0,0.2,1)"/>
+                            </svg>
+                            <div class="tlp-ring-center">
+                                <div class="tlp-pct" id="tlp-pct">0%</div>
+                                <div class="tlp-pct-label">Load</div>
+                            </div>
+                        </div>
+                        <div class="tlp-metrics">
+                            <div class="tlp-metric"><span class="tlp-metric-label">Avg Vehicles</span><span class="tlp-metric-val" id="tlp-avg">—</span></div>
+                            <div class="tlp-metric"><span class="tlp-metric-label">Peak Vehicles</span><span class="tlp-metric-val" id="tlp-peak">—</span></div>
+                            <div class="tlp-metric"><span class="tlp-metric-label">Avg Speed</span><span class="tlp-metric-val" id="tlp-speed">—</span></div>
+                            <div class="tlp-metric"><span class="tlp-metric-label">Risk Score</span><span class="tlp-metric-val" id="tlp-risk">—</span></div>
+                        </div>
+                        <div class="tlp-trend" id="tlp-trend">→ Stable</div>
+                        <div class="tlp-ai-text" id="tlp-ai-text">Awaiting analysis data...</div>
+                    </div>
+                    <div class="glass-card chart-wrapper">
+                        <div id="bar-chart" class="plotly-chart"></div>
+                    </div>
+                </div>
+                
+                <!-- Premium Heatmap -->
+                <div class="glass-card dashboard-col-span heatmap-panel" id="heatmap-panel">
+                    <div class="hm-header">
+                        <div class="hm-title-area">
+                            <span class="hm-icon">🌡️</span>
+                            <div>
+                                <h3 class="hm-title">Traffic Density Heatmap</h3>
+                                <p class="hm-subtitle">Vehicle density across frames by type</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hm-summary" id="hm-summary">
+                        <div class="hm-stat"><span class="hm-stat-label">Peak Density</span><span class="hm-stat-val" id="hm-peak">—</span></div>
+                        <div class="hm-stat"><span class="hm-stat-label">Highest Type</span><span class="hm-stat-val" id="hm-type">—</span></div>
+                        <div class="hm-stat"><span class="hm-stat-label">Congestion Zones</span><span class="hm-stat-val" id="hm-zones">—</span></div>
+                    </div>
+                    <div class="hm-canvas-wrapper">
+                        <canvas id="heatmap-canvas"></canvas>
+                        <div class="hm-tooltip" id="hm-tooltip"></div>
+                    </div>
+                    <div class="hm-legend">
+                        <div class="hm-legend-item"><span class="hm-legend-color" style="background:#0a2463;"></span>Low</div>
+                        <div class="hm-legend-item"><span class="hm-legend-color" style="background:#00b4d8;"></span>Medium</div>
+                        <div class="hm-legend-item"><span class="hm-legend-color" style="background:#f0c808;"></span>High</div>
+                        <div class="hm-legend-item"><span class="hm-legend-color" style="background:#e63946;"></span>Critical</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEATURE 2 & 3: Scenario Simulator and Risk Score -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; margin-top: 1.5rem;">
+                <!-- Simulator -->
+                <div class="glass-card">
+                    <h3>Scenario Simulator</h3>
+                    <p class="text-sm secondary-text mb-4">Simulate external conditions to instantly update ML predictions.</p>
+                    <select id="scenario-select" class="scenario-dropdown w-full">
+                        <option value="1.0" class="sim-opt">Normal (Baseline)</option>
+                        <option value="1.5" class="sim-opt">Heavy Rain (+50% Traffic)</option>
+                        <option value="2.0" class="sim-opt">Construction Zone (+100% Traffic)</option>
+                        <option value="3.0" class="sim-opt">Local Festival (+200% Traffic)</option>
+                        <option value="4.0" class="sim-opt">Roadblock (+300% Traffic)</option>
+                        <option value="5.0" class="sim-opt">Major Accident (+400% Traffic)</option>
+                        <option value="6.0" class="sim-opt">Peak Rush Hour (+500% Traffic)</option>
+                    </select>
+                    <div class="mt-4">
+                        <span class="text-sm font-mono" id="scenario-impact" style="color: var(--primary);">Impact: +0% Expected Congestion</span>
+                    </div>
+                </div>
+
+                <!-- Risk Score -->
+                <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <h3>Traffic Risk Score</h3>
+                    <div style="font-size: 3.5rem; font-family: 'JetBrains Mono', monospace; font-weight: bold; margin: 10px 0; text-shadow: 0 0 10px rgba(255,255,255,0.2);" id="risk-score-val">--</div>
+                    <div class="step-badge" id="risk-score-label" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">CALCULATING...</div>
+                </div>
+            </div>
+
+            <!-- Reporting -->
+            <div class="glass-card mt-6">
+                <div class="flex-between">
+                    <div>
+                        <h3>Analysis Reporting</h3>
+                        <p class="secondary-text text-sm">Export to PDF or dispatch directly to your inbox.</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <input type="email" id="report-email" placeholder="Enter Gmail to receive report (optional)..." class="cyber-input w-full mb-4" style="background: rgba(0,0,0,0.5); border: 1px solid var(--primary); color: white; padding: 12px; border-radius: 5px; font-family: 'Outfit', sans-serif; width: 100%; outline: none;" />
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <button id="generate-report" class="cyber-btn w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span class="icon">📄</span> GENERATE PDF
+                        </button>
+                        <button id="send-report" class="cyber-btn w-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: #10b981; border-color: #10b981;">
+                            <span class="icon" style="display: flex; align-items: center;">
+                                <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" alt="Gmail Logo" width="20" height="20" />
+                            </span> SEND TO GMAIL
+                        </button>
+                    </div>
+                    
+                    <p id="report-status" class="status-msg hidden font-mono mt-4 text-center" style="font-size: 14px;"></p>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FEATURE 4: AI Copilot Chat -->
+    <button id="chat-toggle-btn" class="hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    </button>
+    
+    <div id="chat-panel" class="glass-card hidden">
+        <div class="chat-header">
+            <h3>AI RAG Chat</h3>
+            <button id="chat-close-btn">&times;</button>
+        </div>
+        <div id="chat-messages">
+            <div class="chat-msg ai-msg">Hello! I am your AI RAG Chat. Ask me anything about the generated data!</div>
+        </div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="Ask about peak traffic, trends, or predictions..." class="cyber-input" />
+            <button id="chat-send-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
